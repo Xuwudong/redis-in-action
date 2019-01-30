@@ -21,10 +21,10 @@ public class Chapter02 {
 		Jedis conn = new Jedis("localhost");
 		conn.select(15);
 
-		testLoginCookies(conn);
+//		testLoginCookies(conn);
 //		testShopppingCartCookies(conn);
 //		testCacheRows(conn);
-//		testCacheRequest(conn);
+		testCacheRequest(conn);
 	}
 
 	public void testLoginCookies(Jedis conn) throws InterruptedException {
@@ -165,8 +165,8 @@ public class Chapter02 {
 
 		assert result.equals(result2);
 
-		assert !canCache(conn, "http://test.com/");
-		assert !canCache(conn, "http://test.com/?item=itemX&_=1234536");
+		System.out.println(!canCache(conn, "http://test.com/"));
+		System.out.println(!canCache(conn, "http://test.com/?item=itemX&_=1234536"));
 	}
 
 	public String checkToken(Jedis conn, String token) {
@@ -297,7 +297,7 @@ public class Chapter02 {
 	public class CleanFullSessionsThread extends Thread {
 		private Jedis conn;
 		private int limit;
-		private boolean quit;
+		private AtomicBoolean quit = new AtomicBoolean(false);
 
 		public CleanFullSessionsThread(int limit) {
 			this.conn = new Jedis("localhost");
@@ -306,11 +306,11 @@ public class Chapter02 {
 		}
 
 		public void quit() {
-			quit = true;
+			quit.set(true);
 		}
 
 		public void run() {
-			while (!quit) {
+			while (!quit.get()) {
 				long size = conn.zcard("recent:");
 				if (size <= limit) {
 					try {
@@ -340,7 +340,7 @@ public class Chapter02 {
 
 	public class CacheRowsThread extends Thread {
 		private Jedis conn;
-		private boolean quit;
+		private AtomicBoolean quit = new AtomicBoolean(false);
 
 		public CacheRowsThread() {
 			this.conn = new Jedis("localhost");
@@ -348,12 +348,12 @@ public class Chapter02 {
 		}
 
 		public void quit() {
-			quit = true;
+			quit.set(true);
 		}
 
 		public void run() {
 			Gson gson = new Gson();
-			while (!quit) {
+			while (!quit.get()) {
 				Set<Tuple> range = conn.zrangeWithScores("schedule:", 0, 0);
 				Tuple next = range.size() > 0 ? range.iterator().next() : null;
 				long now = System.currentTimeMillis() / 1000;
