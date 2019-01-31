@@ -178,8 +178,11 @@ public class Chapter02 {
 		conn.hset("login:", token, user);
 		conn.zadd("recent:", timestamp, token);
 		if (item != null) {
-			conn.zadd("viewed:" + token, timestamp, item);
-			conn.zremrangeByRank("viewed:" + token, 0, -26);
+//			conn.zadd("viewed:" + token, timestamp, item);
+//			conn.zremrangeByRank("viewed:" + token, 0, -26);
+			// 将存储最近浏览的商品的有序集合改为列表
+			conn.rpush("viewed: " + token, item);
+			System.out.println("inserted:" + conn.lrange("viewed: " + token, 0, -1));
 			conn.zincrby("viewed:", -1, item);
 		}
 	}
@@ -284,10 +287,12 @@ public class Chapter02 {
 
 				ArrayList<String> sessionKeys = new ArrayList<String>();
 				for (String token : tokens) {
-					sessionKeys.add("viewed:" + token);
+					sessionKeys.add("viewed: " + token);
 				}
-
 				conn.del(sessionKeys.toArray(new String[sessionKeys.size()]));
+				for (String token : tokens) {
+					System.out.println(token + "最近浏览的商品:" + conn.lrange("viewed: " + token, 0, -1));
+				}
 				conn.hdel("login:", tokens);
 				conn.zrem("recent:", tokens);
 			}
@@ -327,11 +332,14 @@ public class Chapter02 {
 
 				ArrayList<String> sessionKeys = new ArrayList<String>();
 				for (String sess : sessions) {
-					sessionKeys.add("viewed:" + sess);
+					sessionKeys.add("viewed: " + sess);
 					sessionKeys.add("cart:" + sess);
 				}
 
 				conn.del(sessionKeys.toArray(new String[sessionKeys.size()]));
+				for (String sess : sessions) {
+					System.out.println(sess + "最近浏览的商品:" + conn.lrange("viewed: " + sess, 0, -1));
+				}
 				conn.hdel("login:", sessions);
 				conn.zrem("recent:", sessions);
 			}
