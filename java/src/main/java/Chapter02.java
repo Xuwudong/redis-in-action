@@ -21,9 +21,9 @@ public class Chapter02 {
 		Jedis conn = new Jedis("localhost");
 		conn.select(15);
 
-//		testLoginCookies(conn);
-//		testShopppingCartCookies(conn);
-//		testCacheRows(conn);
+		testLoginCookies(conn);
+		testShopppingCartCookies(conn);
+		testCacheRows(conn);
 		testCacheRequest(conn);
 	}
 
@@ -180,7 +180,7 @@ public class Chapter02 {
 		if (item != null) {
 //			conn.zadd("viewed:" + token, timestamp, item);
 //			conn.zremrangeByRank("viewed:" + token, 0, -26);
-			// å°†å­˜å‚¨æœ€è¿‘æµè§ˆçš„å•†å“çš„æœ‰åºé›†åˆæ”¹ä¸ºåˆ—è¡¨
+			// ½«´æ´¢×î½üä¯ÀÀµÄÉÌÆ·µÄÓĞĞò¼¯ºÏ¸ÄÎªÁĞ±í
 			conn.rpush("viewed: " + token, item);
 			System.out.println("inserted:" + conn.lrange("viewed: " + token, 0, -1));
 			conn.zincrby("viewed:", -1, item);
@@ -291,7 +291,7 @@ public class Chapter02 {
 				}
 				conn.del(sessionKeys.toArray(new String[sessionKeys.size()]));
 				for (String token : tokens) {
-					System.out.println(token + "æœ€è¿‘æµè§ˆçš„å•†å“:" + conn.lrange("viewed: " + token, 0, -1));
+					System.out.println(token + "×î½üä¯ÀÀµÄÉÌÆ·:" + conn.lrange("viewed: " + token, 0, -1));
 				}
 				conn.hdel("login:", tokens);
 				conn.zrem("recent:", tokens);
@@ -338,7 +338,7 @@ public class Chapter02 {
 
 				conn.del(sessionKeys.toArray(new String[sessionKeys.size()]));
 				for (String sess : sessions) {
-					System.out.println(sess + "æœ€è¿‘æµè§ˆçš„å•†å“:" + conn.lrange("viewed: " + sess, 0, -1));
+					System.out.println(sess + "×î½üä¯ÀÀµÄÉÌÆ·:" + conn.lrange("viewed: " + sess, 0, -1));
 				}
 				conn.hdel("login:", sessions);
 				conn.zrem("recent:", sessions);
