@@ -1,5 +1,6 @@
 *.swp
 /java/build
+/java/.*
 GeoLiteCity-*.csv
 .idea
 *.iml
